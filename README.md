@@ -2,7 +2,7 @@
 
 [Flask](http://flask.pocoo.org/) extension for creating REST APIs and OpenAPI docs with ease, inspired from [FastAPI](https://fastapi.tiangolo.com/).
 
-Checkout example [here](https://github.com/zero-shubham/flask-ease/example)
+Checkout example [here](https://github.com/zero-shubham/flask-ease/tree/master/example)
 
 ## Documentation
 
@@ -13,8 +13,9 @@ Documentation is coming soon :)
 <div class="termy">
 
 ```console
-$ pip install FlaskEase
-
+$ git clone git@github.com:zero-shubham/flask-ease.git
+$ cd flask-ease
+$ poetry install
 $ python example/main.py
 ```
 

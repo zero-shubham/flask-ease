@@ -10,4 +10,4 @@ from flask_ease.utils import (
 )
 from flask_ease.auth_schemes import OAuth2PasswordBearer
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
