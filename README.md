@@ -16,6 +16,7 @@ Documentation is coming soon :)
 $ git clone git@github.com:zero-shubham/flask-ease.git
 $ cd flask-ease
 $ poetry install
+$ source "$( poetry env list --full-path )/bin/activate"
 $ python example/main.py
 ```
 
