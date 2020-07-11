@@ -6,8 +6,9 @@ from flask_ease.schemas import (
 from flask_ease.utils import (
     Depends,
     Security,
-    HTTPException
+    HTTPException,
+    Form
 )
 from flask_ease.auth_schemes import OAuth2PasswordBearer
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
