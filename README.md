@@ -82,3 +82,5 @@ if __name__ == '__main__':
 ```
 
 ## _For a complete understanding check the example [here](https://github.com/zero-shubham/flask-ease/tree/master/example)_
+
+__File-uploads are not yet supported via FlaskEase - to be added soon__
