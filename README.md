@@ -41,11 +41,11 @@ class ExampleResp(BaseModel):
     txt: str
     para:str
     cool_txt:str
+    query:int
 
 class ExampleReqBody(BaseModel):
     txt: str
 
-# the will be injected to method argument
 def call_me_first():
   return "cool"
 
@@ -63,6 +63,7 @@ def call_me_first():
 def get_example(
     some_parameter:str,
     obj_in: ExampleReqBody,
+    query:int=0,
     cool=Depends(call_me_first)
 ):
     # Similar to FastAPI you get everything as argument
@@ -70,7 +71,8 @@ def get_example(
     return ExampleResp(
         txt = obj_in.txt,
         para=some_parameter,
-        cool_txt=cool
+        cool_txt=cool,
+        query=query
     ), 200
 
 
