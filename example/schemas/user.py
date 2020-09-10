@@ -17,8 +17,9 @@ class UserInDB(UserBase):
     id: UUID
 
 
-class UserInResp(UserInDB):
-    pass
+class UserInResp(BaseModel):
+    email: str
+    id: UUID
 
 
 class UsersInResp(BaseModel):
