@@ -21,6 +21,7 @@ from flask_ease.utils import (
     extract_files_from_request
 )
 from flask_ease.templates.swagger_ui import html as swagger_html
+from flask_ease.templates.redoc_ui import html as redoc_html
 import logging
 import json
 from flask_ease.exceptions import messages
@@ -79,6 +80,13 @@ class FlaskEaseAPI():
         def get_swagger_ui():
             return render_template_string(
                 swagger_html,
+                title=self.title
+            )
+
+        @self.app.route("/redoc", methods=["GET"])
+        def get_redoc_ui():
+            return render_template_string(
+                redoc_html,
                 title=self.title
             )
 
