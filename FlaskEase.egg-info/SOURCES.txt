@@ -13,3 +13,5 @@ flask_ease/flask_ease.py
 flask_ease/schemas.py
 flask_ease/status.py
 flask_ease/utils.py
+flask_ease/templates/redoc_ui.py
+flask_ease/templates/swagger_ui.py
