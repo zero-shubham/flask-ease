@@ -9,6 +9,6 @@ User = Table(
     "users",
     db.metadata,
     Column("id", String, primary_key=True),
-    Column("email", String),
+    Column("email", String, unique=True),
     Column("password", String)
 )

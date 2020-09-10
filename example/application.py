@@ -1,5 +1,8 @@
+import sys
+import pathlib
+sys.path.extend([str(pathlib.Path(__file__).parent.parent.absolute())])
+
 from db import db
-from flask import Flask, Blueprint
 import dotenv
 import os
 from flask_cors import CORS
@@ -12,11 +15,10 @@ from flask_ease import (
     Security,
     HTTPException,
     MultipartForm,
-    File
+    File,
+    status
 )
-import sys
-import pathlib
-sys.path.extend([str(pathlib.Path(__file__).parent.parent.absolute())])
+
 
 
 oauth2_scheme = OAuth2PasswordBearer("/login")

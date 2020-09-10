@@ -1,7 +1,8 @@
 from application import (
     Security,
     oauth2_scheme,
-    HTTPException
+    HTTPException,
+    status
 )
 import jwt
 from core.jwt import (

@@ -23,7 +23,8 @@ def find_user_by_id(_id):
         User.columns.id == _id
     )
     user = db.engine.execute(query).fetchone()
-    return dict(user)
+    if user:
+        return dict(user)
 
 
 def find_user_by_user_name(user_name):

@@ -39,7 +39,7 @@ def get_all_users(
     return UsersInResp(
         users=users,
         total_count=count
-    ), 200
+    )
 
 
 @my_api.post(
@@ -57,4 +57,4 @@ def create_new_user(
         id=uuid4(),
         **obj_in.dict()
     ).dict())
-    return new_user, 200
+    return new_user

@@ -1,8 +1,8 @@
-"""new_models
+"""unique email
 
-Revision ID: ec6158b568a8
+Revision ID: 880f9250619d
 Revises: 
-Create Date: 2020-09-10 09:09:48.262518
+Create Date: 2020-09-10 19:30:18.138872
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ec6158b568a8'
+revision = '880f9250619d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,7 +22,8 @@ def upgrade():
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=True),
     sa.Column('password', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email')
     )
     op.create_table('pets',
     sa.Column('id', sa.String(), nullable=False),
