@@ -51,13 +51,7 @@ def call_me_first():
 
 @my_api.post(
     route="/<string:some_parameter>",
-    response_models=[
-        ResponseModel(
-          model_schema=ExampleResp,
-          status_code=200,
-          description="success"
-        )
-    ],
+    response_model=ExampleResp,
     tags=["example_route"]
 )
 def get_example(
