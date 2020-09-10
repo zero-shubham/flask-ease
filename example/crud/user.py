@@ -32,7 +32,8 @@ def find_user_by_user_name(user_name):
         User.columns.email == user_name
     )
     user = db.engine.execute(query).fetchone()
-    return dict(user)
+    if user:
+        return dict(user)
 
 
 def add_new_user_to_db(values: dict):

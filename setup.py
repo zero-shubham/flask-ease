@@ -1,3 +1,4 @@
+
 import pathlib
 from setuptools import setup, find_packages
 
@@ -11,7 +12,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="FlaskEase",
-    version="0.1.3",
+    version="0.1.6",
     description="Flask extension for creating REST APIs and OpenAPI docs with ease, inspired from FastAPI.",
     long_description=README,
     long_description_content_type="text/markdown",

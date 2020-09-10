@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "flask_ease"
-version = "0.1.3"
-description = ""
+version = "0.1.6"
+description = "Flask extension for creating REST APIs and OpenAPI docs with ease, inspired from FastAPI."
 authors = ["Shubham Biswas <shubhambiswas.zero@gmail.com>"]
 
 [tool.poetry.dependencies]

@@ -8,6 +8,7 @@ FlaskEase.egg-info/requires.txt
 FlaskEase.egg-info/top_level.txt
 flask_ease/__init__.py
 flask_ease/auth_schemes.py
+flask_ease/exceptions.py
 flask_ease/flask_ease.py
 flask_ease/schemas.py
 flask_ease/status.py

@@ -9,8 +9,9 @@ from flask_ease.utils import (
     HTTPException,
     Form,
     File,
-    MultipartForm
+    MultipartForm,
+    status
 )
 from flask_ease.auth_schemes import OAuth2PasswordBearer
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'

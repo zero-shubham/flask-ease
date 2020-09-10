@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: FlaskEase
-Version: 0.1.3
+Version: 0.1.6
 Summary: Flask extension for creating REST APIs and OpenAPI docs with ease, inspired from FastAPI.
 Home-page: https://github.com/zero-shubham/flask-ease
 Author: Shubham Biswas
