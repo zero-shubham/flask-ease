@@ -8,10 +8,10 @@ from core.jwt import (
     SECRET_KEY,
     ALGORITHM
 )
-from models.User import User
 from schemas.auth import (
     Token
 )
+from crud.user import find_user_by_id
 
 
 def get_current_user(token=Security(oauth2_scheme)):
@@ -32,7 +32,7 @@ def get_current_user(token=Security(oauth2_scheme)):
                 detail="Could not validate credentials"
             )
 
-    user = User.find_by_id(_id=token_data.user_id)
+    user = find_user_by_id(_id=token_data.user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

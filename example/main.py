@@ -6,10 +6,9 @@ from application import (
 )
 from resources import (
     user,
-    user_group,
-    auth,
-    example
+    auth
 )
+
 
 db.init_app(app)
 
@@ -20,7 +19,6 @@ def create_tables():
 
 
 if __name__ == '__main__':
-    my_api.extend([example.example_blueprint])
     my_api.generate()
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

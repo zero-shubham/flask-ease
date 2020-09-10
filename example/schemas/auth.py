@@ -8,11 +8,9 @@ class LoginResp(BaseModel):
 
 class TokenPayload(BaseModel):
     user_id: str
-    group: str
 
 
 class Token(BaseModel):
     user_id: str
-    group: str
     exp: int
     sub: str

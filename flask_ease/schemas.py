@@ -1,9 +1,15 @@
-from pydantic import BaseModel
+from pydantic import (
+    BaseModel
+)
+from dataclasses import (
+    dataclass
+)
 from pydantic.main import ModelMetaclass
+from typing import Optional, Any
 
 
 class ResponseModel(BaseModel):
-    model_schema: ModelMetaclass
+    model_schema: Optional[ModelMetaclass]
     status_code: int
     description: str
 
@@ -11,27 +17,35 @@ class ResponseModel(BaseModel):
         arbitrary_types_allowed = True
 
 
+@dataclass
 class Form:
+    schema: ModelMetaclass
+    media_type: str = "application/x-www-form-urlencoded"
+    min_length: int = None
+    max_length: int = None
+    regex: str = None
 
-    def __init__(
-        self,
-        schema: ModelMetaclass,
-        media_type: str = "application/x-www-form-urlencoded",
-        min_length: int = None,
-        max_length: int = None,
-        regex: str = None
-    ):
-        self.schema = schema
-        self.media_type = media_type
-        self.min_length = min_length
-        self.max_length = max_length
-        self.regex = regex
+
+@dataclass
+class MultipartForm:
+    schema: ModelMetaclass
+    media_type: str = "multipart/form-data"
+    min_length: int = None
+    max_length: int = None
+
+
+@dataclass
+class File:
+    mime_type: str
+    max_length: int = None
+    min_length: int = None
+    _data: any = None
 
 
 class _OAuth2PasswordRequestFormSchema(BaseModel):
     username: str
     password: str
-    grant_type: str
+    grant_type: str = ""
     client_id: str = ""
     client_secret: str = ""
 

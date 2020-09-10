@@ -9,8 +9,7 @@ from typing import (
 
 
 class UserBase(BaseModel):
-    group: str
-    user_name: str
+    email: str
     password: str
 
 
@@ -18,10 +17,8 @@ class UserInDB(UserBase):
     id: UUID
 
 
-class UserInResp(BaseModel):
-    group: str
-    user_name: str
-    id: UUID
+class UserInResp(UserInDB):
+    pass
 
 
 class UsersInResp(BaseModel):

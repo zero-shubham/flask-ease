@@ -1,12 +1,24 @@
 from pydantic.main import ModelMetaclass
+from dataclasses import (
+    asdict
+)
 import inspect
 import re
 from uuid import UUID
-from typing import Callable
+from typing import (
+    Callable,
+    List,
+    Union
+)
 from enum import Enum
 import http
-from flask_ease.schemas import Form
+from flask_ease.schemas import (
+    Form,
+    File,
+    MultipartForm
+)
 from flask_ease import status
+from flask_ease.exceptions import messages
 
 
 class HTTPException(Exception):
@@ -70,35 +82,46 @@ def get_operation_id(
     return f"{endpoint}_{path}__{method}"
 
 
-def parse_response_models(response_models):
+def parse_response_model(model, responses):
     docs_responses = {}
     docs_definitions = {}
     response_validations = {}
-    for model in response_models:
-        if type(model.model_schema) == ModelMetaclass:
-            schema = model.model_schema.schema()
-            status_code = model.status_code
-            if "definitions" in schema.keys():
-                docs_definitions = {
-                    **docs_definitions,
-                    **schema["definitions"]
-                }
-                del schema["definitions"]
-            docs_responses = {
-                **docs_responses,
-                status_code: {
-                    "description": model.description,
-                    "content": {
-                        "application/json": {
-                            "schema": schema
-                        }
+    if type(model) == ModelMetaclass:
+        schema = model.schema()
+        status_code = 200
+        if "definitions" in schema.keys():
+            docs_definitions = {
+                **docs_definitions,
+                **schema["definitions"]
+            }
+            del schema["definitions"]
+        docs_responses = {
+            **docs_responses,
+            status_code: {
+                "description": "Success",
+                "content": {
+                    "application/json": {
+                        "schema": schema
                     }
                 }
             }
-            response_validations = {
-                **response_validations,
-                status_code: model.model_schema
+        }
+        response_validations = {
+            **response_validations,
+            status_code: model
+        }
+    for status_code, description in responses.items():
+        docs_responses = {
+            **docs_responses,
+            status_code: {
+                "description": description,
+                "content": {
+                    "application/json": {
+                        "schema": schema
+                    }
+                }
             }
+        }
     return (docs_responses, docs_definitions, response_validations)
 
 
@@ -111,6 +134,8 @@ def get_openapi_data_type(_type):
         return "string"
     if _type in [list, tuple]:
         return "array"
+    if issubclass(_type, File):
+        return ("string", "binary")
     return "object"
 
 
@@ -124,6 +149,17 @@ def parse_path_parameter_from_route(route):
         path_params.append(param)
         path_param_found = re.search(':[\w_]+', route)
     return path_params
+
+
+def get_origins(members):
+    origins = list()
+    for member in members:
+        if member[0] == "__origin__":
+            origins.append(member[1])
+        if member[0] == "__args__":
+            origins.extend(member[1])
+    origins.reverse()
+    return origins
 
 
 def extract_params(route, func):
@@ -142,7 +178,8 @@ def extract_params(route, func):
     }
     validations = {
         "params": {},
-        "request_body": {}
+        "request_body": {},
+        "request_form": {}
     }
     signature = inspect.signature(func)
 
@@ -157,7 +194,7 @@ def extract_params(route, func):
 
     if not path_params_set.issubset(func_args_set):
         raise AssertionError(
-            f"Path parameters missing from {func.__name__} endpoint method arguments."
+            messages[3].format(func.__name__)
         )
 
     for key, value in func.__annotations__.items():
@@ -166,7 +203,7 @@ def extract_params(route, func):
 
             if key in path_params and key in defaults.keys():
                 raise AssertionError(
-                    f"Path parameters can't have default values. Check {func.__name__} endpoint method."
+                    messages[2].format(func.__name__)
                 )
 
             doc_details["params"].append({
@@ -205,9 +242,7 @@ def extract_params(route, func):
                 )
             ):
                 raise Exception(
-                    f"""More that one request
-                        body found for {func.__name__} endpoint.
-                        """
+                    f"More that one request body found for {func.__name__} endpoint."
                 )
             if type(value) == ModelMetaclass:
                 schema = value.schema()
@@ -236,20 +271,126 @@ def extract_params(route, func):
                     }
             }
 
+            if type(value) == ModelMetaclass:
+                validations["request_body"] = {
+                    f"{key}": {
+                        "type": content_type,
+                        "schema": value
+                    }
+                }
+            else:
+                validations["request_form"] = {
+                    f"{key}": {
+                        "type": content_type,
+                        "schema": value.schema
+                    }
+                }
+        elif type(value) == File:
+            doc_details["request_body"]["content"][value.mime_type] = {
+                "schema": {
+                    "type": "string",
+                    "format": "binary"
+                }
+            }
             validations["request_body"] = {
                 f"{key}": {
-                    "type": content_type,
-                    "schema": (
-                        value if type(
-                            value) == ModelMetaclass else value.schema
+                    "type": "file",
+                    "schema": asdict(value)
+                }
+            }
+        elif type(value) == MultipartForm:
+            value_schema = value.schema.schema()
+            schema_annotations = value.schema.__annotations__
+            schema_properties = {}
+            validation_properties = {}
+            for k, v in schema_annotations.items():
+                origins = get_origins(inspect.getmembers(v))
+                if len(origins) and origins[0] == Union:
+                    origins = get_origins(inspect.getmembers(origins[-1]))
+
+                if len(origins):
+                    if (
+                        len(origins) == 2 and get_openapi_data_type(
+                            origins[0]) == "array"
+                    ):
+                        items_type = get_openapi_data_type(
+                            origins[1])
+                        validation_properties[k] = {
+                            "type": items_type,
+                            "schema": origins[-1]
+                        }
+                        if type(items_type) == tuple:
+                            schema_properties[k] = {
+                                "type": "array",
+                                "items": {
+                                        "type": items_type[0],
+                                        "format": items_type[1]
+                                }
+                            }
+                        else:
+                            schema_properties[k] = {
+                                "type": "array",
+                                "items": {
+                                        "type": items_type
+                                }
+                            }
+            done_properties = schema_properties.keys()
+            left_out_props = value_schema["properties"]
+            for k, v in left_out_props.items():
+                if k not in done_properties:
+                    optional_type = get_origins(
+                        inspect.getmembers(schema_annotations[k])
                     )
+                    item_type = get_openapi_data_type(
+                        schema_annotations[k] if not len(
+                            optional_type) else optional_type[-1]
+                    )
+
+                    validation_properties[k] = {
+                        "type": item_type,
+                        "schema": schema_annotations[k]
+                    }
+                    if type(item_type) == tuple:
+                        schema_properties[k] = {
+                            "type": item_type[0],
+                            "format": item_type[1]
+                        }
+                    else:
+                        if item_type == "object":
+                            schema_name = v["$ref"].split("/")[-1]
+                            doc_details["components"]["schemas"] = {
+                                f"{schema_name}": value_schema["definitions"][schema_name]
+                            }
+
+                            schema_properties[k] = {
+                                "type": item_type,
+                                "schema": f"#components/schema/{schema_name}"
+                            }
+                        else:
+                            schema_properties[k] = {
+                                "type": item_type
+                            }
+
+            doc_details["request_body"]["content"][
+                "multipart/form-data"
+            ] = {
+                "schema": {
+                    "type": "object",
+                    "properties": schema_properties,
+                    "required": value_schema["required"]
+                }
+            }
+
+            validations["request_form"] = {
+                f"{key}": {
+                    "type": "multipart/form-data",
+                    "properties": validation_properties,
+                    "schema": value
                 }
             }
         else:
             raise TypeError(
-                f"""{key} of type {type(value)} is not supported.
-                    Use primitive type for declaring query or path parameters.
-                    Otherwise pydantic BaseModel for declaring request body."""
+                messages[1].format(key, type(value))
             )
 
     return (doc_details, validations)
@@ -318,3 +459,52 @@ def generate_auth_scheme(scheme):
         }
     }
     return openapi_auth_scheme
+
+
+def check_file_validity(
+    received_file,
+    file_content_type,
+    schema
+):
+    if file_content_type != schema["mime_type"]:
+        raise ValueError("Invalid file type received.")
+        return None
+    if (
+        (
+            schema["min_length"]
+            and
+            len(
+                received_file) < schema["min_length"]
+        )
+    ):
+        raise ValueError("Invalid file size received.")
+        return None
+
+    if (
+        (
+            schema["min_length"]
+            and
+            len(
+                received_file) > schema["max_length"]
+        )
+    ):
+        raise ValueError("Invalid file size received.")
+        return None
+
+    return received_file
+
+
+def extract_files_from_request(_key, files_dict, FileType):
+    _files = []
+    for element in files_dict.lists():
+        if element[0] == _key:
+            for _file in element[1]:
+                _files.append(
+                    FileType(
+                        mime_type=element[1][0].mimetype,
+                        _data=_file
+                    )
+                )
+    if len(_files) == 1:
+        return _files[0]
+    return _files

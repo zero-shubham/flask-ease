@@ -9,7 +9,8 @@ from sqlalchemy import pool
 
 from alembic import context
 from models.User import User
-from models.UserGroup import UserGroup
+from models.Pet import Pet
+from models.Match import Match
 from db import db
 
 # this is the Alembic Config object, which provides

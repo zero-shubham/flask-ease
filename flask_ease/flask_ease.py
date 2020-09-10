@@ -11,16 +11,19 @@ from flask_ease.schemas import ResponseModel
 from pydantic.main import ModelMetaclass
 from flask_ease.utils import (
     get_operation_id,
-    parse_response_models,
+    parse_response_model,
     extract_params,
     extract_dependencies,
     generate_openapi_paths,
     generate_auth_scheme,
-    HTTPException
+    HTTPException,
+    check_file_validity,
+    extract_files_from_request
 )
 from flask_ease.templates.swagger_ui import html as swagger_html
 import logging
 import json
+from flask_ease.exceptions import messages
 
 
 class FlaskEaseAPI():
@@ -50,8 +53,7 @@ class FlaskEaseAPI():
 
     def generate(self):
         if self.blueprint_name:
-            logging.error(
-                "Blueprints can only be extended by FlaskEaseAPI apps")
+            logging.error(messages[0])
             return
         self.open_api = {
             **self.open_api,
@@ -66,8 +68,8 @@ class FlaskEaseAPI():
             "paths": generate_openapi_paths(self.endpoints, self.auth_scheme)
         }
         if self.auth_scheme:
-            self.open_api["components"]["securitySchemes"] = generate_auth_scheme(
-                self.auth_scheme)
+            self.open_api["components"]["securitySchemes"] = \
+                generate_auth_scheme(self.auth_scheme)
 
         @self.app.route("/docs/openapi.json", methods=['GET'])
         def get_openapi():
@@ -84,15 +86,16 @@ class FlaskEaseAPI():
         self,
         route: str,
         methods: List[str],
-        response_models: List[ResponseModel] = [],
+        response_model=None,
         tags: List[str] = [],
-        auth_required: bool = False
+        auth_required: bool = False,
+        responses: dict = {}
     ):
         def decorate_func(func):
             doc_details, validations = extract_params(route, func)
 
-            docs_responses, docs_definitions, response_validations = parse_response_models(
-                response_models)
+            docs_responses, docs_definitions, response_validations = \
+                parse_response_model(response_model, responses)
 
             dependencies = extract_dependencies(func)
 
@@ -142,9 +145,13 @@ class FlaskEaseAPI():
                 parameter_keys = validations["params"].keys()
 
                 request_body_key = None
+                request_form_key = None
                 if validations["request_body"]:
                     request_body_key = list(
                         validations["request_body"].keys())[0]
+                if validations["request_form"]:
+                    request_form_key = list(
+                        validations["request_form"].keys())[0]
                 try:
                     for p in parameter_keys:
                         parameter_type = validations["params"][p]["_type"]
@@ -175,10 +182,54 @@ class FlaskEaseAPI():
                             ] = request_body_schema(
                                 **request.json
                             )
-                        else:
+                        elif(
+                            validations["request_body"][request_body_key]["type"]
+                            == "file"
+                        ):
                             kwargs_to_pass[
                                 request_body_key
-                            ] = request_body_schema(
+                            ] = check_file_validity(
+                                request.data,
+                                request.mimetype,
+                                request_body_schema
+                            )
+
+                    if request_form_key:
+                        request_form_schema = validations[
+                            "request_form"][request_form_key]["schema"]
+                        if (
+                            "properties" in
+                            validations["request_form"][request_form_key]
+                        ):
+                            request_form_props = validations[
+                                "request_form"][request_form_key]["properties"]
+
+                        form_data = {}
+                        if (
+                            validations["request_form"][
+                                request_form_key]["type"] == "multipart/form-data"
+                        ):
+                            for k, v in request_form_props.items():
+                                if v["type"] == ('string', 'binary'):
+                                    form_data[k] = \
+                                        extract_files_from_request(
+                                        k,
+                                        request.files,
+                                        v["schema"]
+                                    )
+                                else:
+                                    if k in request.form:
+                                        form_data[k] = request.form[k]
+                                    else:
+                                        form_data[k] = None
+                            request_form_schema.schema(**form_data)
+                            kwargs_to_pass[
+                                request_form_key
+                            ] = form_data
+                        else:
+                            kwargs_to_pass[
+                                request_form_key
+                            ] = request_form_schema(
                                 **request.form
                             )
 
@@ -235,14 +286,15 @@ class FlaskEaseAPI():
     def get(
         self,
         route: str,
-        response_models: List[ResponseModel] = [],
+        response_model=None,
         tags: List[str] = [],
-        auth_required: bool = False
+        auth_required: bool = False,
+        responses: dict = {}
     ):
         return self._register(
             route,
             ["GET"],
-            response_models,
+            response_model,
             tags,
             auth_required
         )
@@ -250,14 +302,15 @@ class FlaskEaseAPI():
     def post(
         self,
         route: str,
-        response_models: List[ResponseModel] = [],
+        response_model=None,
         tags: List[str] = [],
-        auth_required: bool = False
+        auth_required: bool = False,
+        responses: dict = {}
     ):
         return self._register(
             route,
             ["POST"],
-            response_models,
+            response_model,
             tags,
             auth_required
         )
@@ -265,14 +318,15 @@ class FlaskEaseAPI():
     def put(
         self,
         route: str,
-        response_models: List[ResponseModel] = [],
+        response_model=None,
         tags: List[str] = [],
-        auth_required: bool = False
+        auth_required: bool = False,
+        responses: dict = {}
     ):
         return self._register(
             route,
             ["PUT"],
-            response_models,
+            response_model,
             tags,
             auth_required
         )
@@ -280,14 +334,15 @@ class FlaskEaseAPI():
     def patch(
         self,
         route: str,
-        response_models: List[ResponseModel] = [],
+        response_model=None,
         tags: List[str] = [],
-        auth_required: bool = False
+        auth_required: bool = False,
+        responses: dict = {}
     ):
         return self._register(
             route,
             ["PATCH"],
-            response_models,
+            response_model,
             tags,
             auth_required
         )
@@ -295,14 +350,15 @@ class FlaskEaseAPI():
     def delete(
         self,
         route: str,
-        response_models: List[ResponseModel] = [],
+        response_model=None,
         tags: List[str] = [],
-        auth_required: bool = False
+        auth_required: bool = False,
+        responses: dict = {}
     ):
         return self._register(
             route,
             ["DELETE"],
-            response_models,
+            response_model,
             tags,
             auth_required
         )
