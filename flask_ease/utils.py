@@ -162,6 +162,18 @@ def get_origins(members):
     return origins
 
 
+def extract_annotations(v, deep=False):
+    annot = dict()
+    annot = v.__annotations__
+    if deep:
+        for b in v.__bases__:
+            annot = {
+                **annot,
+                **b.__annotations__
+            }
+    return annot
+
+
 def extract_params(route, func):
     path_params = parse_path_parameter_from_route(route)
     doc_details = {
@@ -300,7 +312,7 @@ def extract_params(route, func):
             }
         elif type(value) == MultipartForm:
             value_schema = value.schema.schema()
-            schema_annotations = value.schema.__annotations__
+            schema_annotations = extract_annotations(value.schema, True)
             schema_properties = {}
             validation_properties = {}
             for k, v in schema_annotations.items():

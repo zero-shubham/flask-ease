@@ -20,7 +20,7 @@ def get_all_users_count_in_db():
 
 def find_user_by_id(_id):
     query = User.select().where(
-        User.columns.id == _id
+        User.columns.id == str(_id)
     )
     user = db.engine.execute(query).fetchone()
     if user:

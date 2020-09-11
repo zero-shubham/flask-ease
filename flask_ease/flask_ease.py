@@ -230,10 +230,10 @@ class FlaskEaseAPI():
                                         form_data[k] = request.form[k]
                                     else:
                                         form_data[k] = None
-                            request_form_schema.schema(**form_data)
+
                             kwargs_to_pass[
                                 request_form_key
-                            ] = form_data
+                            ] = request_form_schema.schema(**form_data)
                         else:
                             kwargs_to_pass[
                                 request_form_key
@@ -257,9 +257,9 @@ class FlaskEaseAPI():
                                     response_code]:
                                 response = response.dict()
 
-                            response = dict(
-                                response_validations[response_code](**response)
-                            )
+                            response = response_validations[response_code](
+                                **response
+                            ).dict()
 
                     except Exception as e:
                         logging.exception(e)

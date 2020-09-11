@@ -6,7 +6,8 @@ from application import (
 )
 from resources import (
     user,
-    auth
+    auth,
+    pet
 )
 
 

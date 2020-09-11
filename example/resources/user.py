@@ -11,7 +11,8 @@ from schemas.user import (
 from crud.user import (
     get_all_users_in_db,
     get_all_users_count_in_db,
-    add_new_user_to_db
+    add_new_user_to_db,
+    find_user_by_id
 )
 from uuid import UUID, uuid4
 from utils.dependencies import get_current_user
@@ -58,3 +59,20 @@ def create_new_user(
         **obj_in.dict()
     ).dict())
     return new_user
+
+
+@my_api.get(
+    route="/users/<uuid:id>",
+    response_model=UserInResp,
+    tags=["users"],
+    auth_required=True
+)
+def get_user_by_id(
+    id: UUID,
+    current_user=Depends(get_current_user)
+):
+    """
+    Get user by ID
+    """
+    user = find_user_by_id(id)
+    return user
