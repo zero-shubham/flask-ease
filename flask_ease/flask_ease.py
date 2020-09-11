@@ -308,7 +308,8 @@ class FlaskEaseAPI():
             ["GET"],
             response_model,
             tags,
-            auth_required
+            auth_required,
+            responses
         )
 
     def post(
@@ -324,7 +325,8 @@ class FlaskEaseAPI():
             ["POST"],
             response_model,
             tags,
-            auth_required
+            auth_required,
+            responses
         )
 
     def put(
@@ -340,7 +342,8 @@ class FlaskEaseAPI():
             ["PUT"],
             response_model,
             tags,
-            auth_required
+            auth_required,
+            responses
         )
 
     def patch(
@@ -356,7 +359,8 @@ class FlaskEaseAPI():
             ["PATCH"],
             response_model,
             tags,
-            auth_required
+            auth_required,
+            responses
         )
 
     def delete(
@@ -372,7 +376,8 @@ class FlaskEaseAPI():
             ["DELETE"],
             response_model,
             tags,
-            auth_required
+            auth_required,
+            responses
         )
 
     def extend(self, blueprints: list):

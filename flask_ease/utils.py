@@ -115,13 +115,9 @@ def parse_response_model(model, responses):
             **docs_responses,
             status_code: {
                 "description": description,
-                "content": {
-                    "application/json": {
-                        "schema": schema
-                    }
-                }
             }
         }
+
     return (docs_responses, docs_definitions, response_validations)
 
 

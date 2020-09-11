@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator
 from typing import List, Optional
-from application import MultipartForm
+from application import Form
 from pydantic.dataclasses import dataclass
 from uuid import UUID
 
@@ -22,7 +22,7 @@ class PetInResp(PetInDB):
 
 class PetsInResp(BaseModel):
     pets: List[PetInResp]
-    count: int
+    total_count: int
 
 
 class PetCreation(PetBase):
@@ -37,4 +37,4 @@ class PetCreation(PetBase):
         return v
 
 
-PetCreationForm = MultipartForm(schema=PetCreation)
+PetCreationForm = Form(schema=PetCreation)
