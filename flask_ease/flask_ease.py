@@ -251,12 +251,16 @@ class FlaskEaseAPI():
                         response_code = 200
                         if type(resp) == tuple:
                             response, response_code = resp
+
                         if response_code in response_validations.keys():
                             if type(response) is response_validations[
                                     response_code]:
                                 response = response.dict()
 
-                            response_validations[response_code](**response)
+                            response = dict(
+                                response_validations[response_code](**response)
+                            )
+
                     except Exception as e:
                         logging.exception(e)
                         response = {

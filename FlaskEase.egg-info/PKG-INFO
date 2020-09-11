@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: FlaskEase
-Version: 0.1.6
+Version: 0.1.7
 Summary: Flask extension for creating REST APIs and OpenAPI docs with ease, inspired from FastAPI.
 Home-page: https://github.com/zero-shubham/flask-ease
 Author: Shubham Biswas
@@ -59,13 +59,7 @@ Description: # FlaskEase
         
         @my_api.post(
             route="/<string:some_parameter>",
-            response_models=[
-                ResponseModel(
-                  model_schema=ExampleResp,
-                  status_code=200,
-                  description="success"
-                )
-            ],
+            response_model=ExampleResp,
             tags=["example_route"]
         )
         def get_example(
@@ -91,7 +85,8 @@ Description: # FlaskEase
         
         ## _For a complete understanding check the example [here](https://github.com/zero-shubham/flask-ease/tree/master/example)_
         
-        __File-uploads are not yet supported via FlaskEase - to be added soon__
+        __~~File-uploads are not yet supported via FlaskEase - to be added soon~~__
+        __Now with File-upload and Multiform support.__
 Platform: UNKNOWN
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3

@@ -12,5 +12,5 @@ class OAuth2PasswordBearer:
         self.token_prefix = "Bearer "
 
     def __call__(self):
-        if request.headers.has_key(self.header):
+        if self.header in request.headers:
             return request.headers[self.header]
