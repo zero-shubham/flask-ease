@@ -25,7 +25,10 @@ oauth2_scheme = OAuth2PasswordBearer("/login")
 dotenv.load_dotenv()
 DATABASE_URI = os.environ["DATABASE_URI"]
 
-my_api = FlaskEaseAPI(auth_scheme=oauth2_scheme, title="Test FlaskEase")
+my_api = FlaskEaseAPI(
+    auth_scheme=oauth2_scheme,
+    title="Test FlaskEase"
+)
 app = my_api.app
 CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI

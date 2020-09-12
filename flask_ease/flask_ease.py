@@ -34,13 +34,16 @@ class FlaskEaseAPI():
         blueprint_name: str = None,
         open_api_version: str = "3.0.3",
         app_version: str = "0.1.0",
-        auth_scheme=None
+        auth_scheme=None,
+        import_name=__name__,
+        **kwargs
     ):
         self.blueprint_name = blueprint_name
+
         if blueprint_name:
-            self.app = Blueprint(blueprint_name, __name__)
+            self.app = Blueprint(blueprint_name, import_name, **kwargs)
         else:
-            self.app = Flask(__name__)
+            self.app = Flask(import_name, **kwargs)
 
         self.app_version = app_version
         self.title = title
