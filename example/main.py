@@ -19,8 +19,8 @@ def create_tables():
     db.create_all()
 
 
-if __name__ == '__main__':
-    my_api.extend([pet.pets_blp])
-    my_api.generate()
+my_api.extend([pet.pets_blp])
+my_api.generate()
 
+if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

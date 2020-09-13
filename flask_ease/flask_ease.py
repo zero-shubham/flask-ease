@@ -104,7 +104,7 @@ class FlaskEaseAPI():
     ):
         def decorate_func(func):
             adjusted_route = route
-            if self.blueprint_name:
+            if self.blueprint_name and self.app.url_prefix:
                 adjusted_route = self.app.url_prefix+route
 
             doc_details, validations = extract_params(adjusted_route, func)
