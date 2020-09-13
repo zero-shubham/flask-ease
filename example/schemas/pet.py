@@ -9,7 +9,7 @@ class PetBase(BaseModel):
     name: str
     breed: str
     description: str
-    owner: UUID
+    owner: str
 
 
 class PetInDB(PetBase):

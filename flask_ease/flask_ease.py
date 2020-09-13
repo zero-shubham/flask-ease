@@ -103,7 +103,11 @@ class FlaskEaseAPI():
         responses: dict = {}
     ):
         def decorate_func(func):
-            doc_details, validations = extract_params(route, func)
+            adjusted_route = route
+            if self.blueprint_name:
+                adjusted_route = self.app.url_prefix+route
+
+            doc_details, validations = extract_params(adjusted_route, func)
 
             docs_responses, docs_definitions, response_validations = \
                 parse_response_model(response_model, responses)
@@ -127,12 +131,12 @@ class FlaskEaseAPI():
                 "auth_required": auth_required
             }
 
-            if route in self.endpoints.keys():
-                self.endpoints[route][
+            if adjusted_route in self.endpoints.keys():
+                self.endpoints[adjusted_route][
                     methods[0].lower()
                 ] = endpoint_doc_details
             else:
-                self.endpoints[route] = {
+                self.endpoints[adjusted_route] = {
                     f"{methods[0].lower()}": endpoint_doc_details
                 }
 

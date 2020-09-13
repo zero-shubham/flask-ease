@@ -30,25 +30,36 @@ Now go to <a href="http://127.0.0.1:5000/docs" class="external-link" target="_bl
 
 # * example/resources/pet.py
 from application import (
-    my_api,
+    FlaskEaseAPI,
     Depends,
     HTTPException,
-    status
+    status,
+    File
 )
 from schemas.pet import (
     PetCreationForm,
     PetInResp,
-    PetInDB
+    PetInDB,
+    PetsInResp
 )
 from utils.dependencies import get_current_user
 from crud.pet import (
-    add_new_pet_to_db
+    add_new_pet_to_db,
+    find_pet_by_id,
+    get_all_pets_count_in_db,
+    get_all_pets_in_db
 )
-from uuid import uuid4
+from uuid import uuid4, UUID
+from flask import send_from_directory
+
+pets_blp = FlaskEaseAPI(
+    blueprint_name="Pets",
+    url_prefix="/pets"
+)
 
 
-@my_api.post(
-    route="/pets",
+@pets_blp.post(
+    route="/",
     response_model=PetInResp,
     tags=["pets"],
     auth_required=True
@@ -68,14 +79,77 @@ def create_new_pet(
         )
 
     new_pet = add_new_pet_to_db(PetInDB(
-        id=uuid4(),
+        id=str(uuid4()),
         **obj_in.dict()
     ).dict())
     return new_pet
+
+
+@pets_blp.get(
+    route="/<uuid:id>",
+    response_model=PetInResp,
+    tags=["pets"],
+    auth_required=True
+)
+def get_pet_by_id(
+    id: UUID
+):
+    """
+    Get pet by id
+    """
+    pet = find_pet_by_id(id)
+    return pet
+
+
+@pets_blp.get(
+    route="/",
+    response_model=PetsInResp,
+    tags=["pets"],
+    auth_required=True
+)
+def get_all_pets(
+    offset: int = 0,
+    limit: int = 10,
+    current_user=Depends(get_current_user)
+):
+    """
+    Get all pets in db
+    """
+    pets = get_all_pets_in_db(
+        offset,
+        limit
+    )
+    count = get_all_pets_count_in_db()
+    return PetsInResp(
+        pets=pets,
+        total_count=count
+    )
+
+
+@pets_blp.post(
+    route="/<uuid:id>/photo",
+    tags=["pets"],
+    auth_required=True,
+    responses={
+        '204': 'File accepted and saved.'
+    }
+)
+def add_pet_photo(
+    id: UUID,
+    photo: File("image/png"),
+    current_user=Depends(get_current_user)
+):
+    """
+    Add pet photo.
+    """
+    with open(f"{id}.png", "wb") as photoFile:
+        photoFile.write(photo)
+    return "True", 204
+
 
 ```
 
 ## _For a complete understanding check the example [here](https://github.com/zero-shubham/flask-ease/tree/master/example)_
 
 **~~File-uploads are not yet supported via FlaskEase - to be added soon~~**
-**Now with File-upload and Multiform support.**
+**Now with File-upload and Multipart-Form support.**

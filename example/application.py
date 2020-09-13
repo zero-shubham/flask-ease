@@ -29,6 +29,8 @@ my_api = FlaskEaseAPI(
     auth_scheme=oauth2_scheme,
     title="Test FlaskEase"
 )
+
+
 app = my_api.app
 CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI

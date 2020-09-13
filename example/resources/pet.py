@@ -1,5 +1,5 @@
 from application import (
-    my_api,
+    FlaskEaseAPI,
     Depends,
     HTTPException,
     status,
@@ -21,9 +21,14 @@ from crud.pet import (
 from uuid import uuid4, UUID
 from flask import send_from_directory
 
+pets_blp = FlaskEaseAPI(
+    blueprint_name="Pets",
+    url_prefix="/pets"
+)
 
-@my_api.post(
-    route="/pets",
+
+@pets_blp.post(
+    route="/",
     response_model=PetInResp,
     tags=["pets"],
     auth_required=True
@@ -43,14 +48,14 @@ def create_new_pet(
         )
 
     new_pet = add_new_pet_to_db(PetInDB(
-        id=uuid4(),
+        id=str(uuid4()),
         **obj_in.dict()
     ).dict())
     return new_pet
 
 
-@my_api.get(
-    route="/pets/<uuid:id>",
+@pets_blp.get(
+    route="/<uuid:id>",
     response_model=PetInResp,
     tags=["pets"],
     auth_required=True
@@ -65,8 +70,8 @@ def get_pet_by_id(
     return pet
 
 
-@my_api.get(
-    route="/pets",
+@pets_blp.get(
+    route="/",
     response_model=PetsInResp,
     tags=["pets"],
     auth_required=True
@@ -90,8 +95,8 @@ def get_all_pets(
     )
 
 
-@my_api.post(
-    route="/pets/<uuid:id>/photo",
+@pets_blp.post(
+    route="/<uuid:id>/photo",
     tags=["pets"],
     auth_required=True,
     responses={

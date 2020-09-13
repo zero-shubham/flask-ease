@@ -20,6 +20,7 @@ def create_tables():
 
 
 if __name__ == '__main__':
+    my_api.extend([pet.pets_blp])
     my_api.generate()
 
     app.run(host='0.0.0.0', port=5000, debug=True)
