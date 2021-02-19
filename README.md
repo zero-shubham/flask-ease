@@ -153,3 +153,5 @@ def add_pet_photo(
 
 **~~File-uploads are not yet supported via FlaskEase - to be added soon~~**
 **Now with File-upload and Multipart-Form support.**
+
+**Abandoned project -  chose to solve better problems. Use FastAPI or flask-smorest**
