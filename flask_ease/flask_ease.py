@@ -100,7 +100,9 @@ class FlaskEaseAPI():
         response_model=None,
         tags: List[str] = [],
         auth_required: bool = False,
-        responses: dict = {}
+        responses: dict = {},
+        endpoint: str = None,
+        **kwargs
     ):
         def decorate_func(func):
             adjusted_route = route
@@ -113,6 +115,8 @@ class FlaskEaseAPI():
                 parse_response_model(response_model, responses)
 
             dependencies = extract_dependencies(func)
+            # support for custom endpoints and passing param rules
+            endpoint_view = endpoint or func.__name__
 
             filtered_req_body = {
                 k: v
@@ -126,7 +130,7 @@ class FlaskEaseAPI():
                 "requestBody": {
                     "content": filtered_req_body
                 },
-                "endpoint_method": func.__name__,
+                "endpoint_method": endpoint_view,
                 "responses": docs_responses,
                 "auth_required": auth_required
             }
@@ -293,12 +297,13 @@ class FlaskEaseAPI():
 
                 return response, response_code
 
-            provide_request.__name__ = func.__name__
+            provide_request.__name__ = endpoint_view
             self.app.add_url_rule(
                 rule=route,
-                endpoint=func.__name__,
+                endpoint=endpoint_view,
                 view_func=provide_request,
-                methods=methods
+                methods=methods,
+                **kwargs
             )
         return decorate_func
 
@@ -308,7 +313,9 @@ class FlaskEaseAPI():
         response_model=None,
         tags: List[str] = [],
         auth_required: bool = False,
-        responses: dict = {}
+        responses: dict = {},
+        endpoint: str = None,
+        **kwargs
     ):
         return self._register(
             route,
@@ -316,7 +323,9 @@ class FlaskEaseAPI():
             response_model,
             tags,
             auth_required,
-            responses
+            responses,
+            endpoint,
+            **kwargs
         )
 
     def post(
@@ -325,7 +334,9 @@ class FlaskEaseAPI():
         response_model=None,
         tags: List[str] = [],
         auth_required: bool = False,
-        responses: dict = {}
+        responses: dict = {},
+        endpoint: str = None,
+        **kwargs
     ):
         return self._register(
             route,
@@ -333,7 +344,9 @@ class FlaskEaseAPI():
             response_model,
             tags,
             auth_required,
-            responses
+            responses,
+            endpoint,
+            **kwargs
         )
 
     def put(
@@ -342,7 +355,9 @@ class FlaskEaseAPI():
         response_model=None,
         tags: List[str] = [],
         auth_required: bool = False,
-        responses: dict = {}
+        responses: dict = {},
+        endpoint: str = None,
+        **kwargs
     ):
         return self._register(
             route,
@@ -350,7 +365,9 @@ class FlaskEaseAPI():
             response_model,
             tags,
             auth_required,
-            responses
+            responses,
+            endpoint,
+            **kwargs
         )
 
     def patch(
@@ -359,7 +376,9 @@ class FlaskEaseAPI():
         response_model=None,
         tags: List[str] = [],
         auth_required: bool = False,
-        responses: dict = {}
+        responses: dict = {},
+        endpoint: str = None,
+        **kwargs
     ):
         return self._register(
             route,
@@ -367,7 +386,9 @@ class FlaskEaseAPI():
             response_model,
             tags,
             auth_required,
-            responses
+            responses,
+            endpoint,
+            **kwargs
         )
 
     def delete(
@@ -376,7 +397,9 @@ class FlaskEaseAPI():
         response_model=None,
         tags: List[str] = [],
         auth_required: bool = False,
-        responses: dict = {}
+        responses: dict = {},
+        endpoint: str = None,
+        **kwargs
     ):
         return self._register(
             route,
@@ -384,7 +407,9 @@ class FlaskEaseAPI():
             response_model,
             tags,
             auth_required,
-            responses
+            responses,
+            endpoint,
+            **kwargs
         )
 
     def extend(self, blueprints: list):
